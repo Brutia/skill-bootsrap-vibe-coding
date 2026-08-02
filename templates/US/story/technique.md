@@ -6,7 +6,7 @@
 
 ## Modèle de données
 
-<!-- Entités, champs, relations ; renvoi vers schema Prisma si applicable -->
+<!-- Entités, champs, relations ; renvoi vers next-app/prisma/schema.prisma (Prisma 7) si applicable -->
 
 ## API / Server Actions / Routes
 

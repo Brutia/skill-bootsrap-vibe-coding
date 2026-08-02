@@ -52,10 +52,21 @@ Ne pas exécuter depuis le contexte agent les commandes de gestionnaire de paque
 
 Laisser ces opérations au développeur ou à l’environnement dédié.
 
-#### Base de données (Prisma)
+#### Base de données (Prisma 7)
 
+- Utiliser **Prisma ORM 7** par défaut (Node.js 20.19+, TypeScript 5.4+).
 - Ne pas créer de migrations Prisma soi-même (pas de nouveau dossier sous `next-app/prisma/migrations/`, pas de `migration.sql` écrit à la main).
 - Après modification de `schema.prisma`, laisser le développeur lancer `pnpm db:migrate` depuis `next-app/` pour que Prisma génère les migrations.
+- Ne pas mettre `url` dans le bloc `datasource` de `schema.prisma` — l’URL est dans `prisma.config.ts`.
+- Utiliser `provider = "prisma-client"` (pas `prisma-client-js`) et l’import depuis `app/generated/prisma/client` (pas `@prisma/client`).
+- Instancier `PrismaClient` avec l’adaptateur `@prisma/adapter-pg` (voir [templates/next-app/lib/prisma.ts](templates/next-app/lib/prisma.ts)).
+
+#### Next.js — proxy (pas middleware)
+
+- Ne pas créer de fichier `middleware.ts` — la convention est dépréciée depuis Next.js 16.
+- Utiliser `proxy.ts` à la racine de `next-app/` (ou dans `src/` si le projet utilise `src/`), avec une fonction exportée nommée `proxy` (pas `middleware`).
+- Pour next-auth v4 : `export { default as proxy } from "next-auth/middleware"` dans `proxy.ts`.
+- Référence : [Migration middleware → proxy](https://nextjs.org/docs/messages/middleware-to-proxy).
 
 #### Authentification
 
@@ -67,7 +78,8 @@ Adapt paths if the user’s layout differs; default app root is **`next-app/`**.
 
 Ask:
 
-- **Base de données** : oui / non. If yes: Postgres version, docker compose file name, env var names for `DATABASE_URL`, and scripts (`db:migrate`, `db:studio`, etc.) once known from the user or from a future `package.json`.
+- **Base de données** : oui / non. If yes (default stack): **Prisma 7** + PostgreSQL via **docker-compose** à la racine du dépôt.
+- If yes, confirm or customize defaults: Postgres version (`16`), user (`app`), password (`app_dev`), database name (`app`), port (`5432`).
 - **Autres services** (Redis, S3, etc.) for docker/README sections.
 
 ## Phase 2 — Create directory layout
@@ -81,6 +93,17 @@ At the target root, create:
 ├── AGENTS.md
 └── README.md
 ```
+
+If database is enabled (§1.3), also create at the **repository root**:
+
+```
+./
+├── docker-compose.yml      # PostgreSQL de test (depuis templates/docker-compose.yml)
+├── .env.example            # Variables Docker (POSTGRES_*)
+└── next-app/.env.example   # DATABASE_URL alignée sur le compose
+```
+
+Replace `{{POSTGRES_VERSION}}`, `{{POSTGRES_USER}}`, `{{POSTGRES_PASSWORD}}`, `{{POSTGRES_DB}}` in those files with values from §1.3 (defaults: `16`, `app`, `app_dev`, `app`).
 
 ### `US/` — user stories
 
@@ -107,14 +130,15 @@ If the user provides story titles only, create empty files with section headings
 **Do not** run `pnpm dlx shadcn@latest init ...`.
 
 1. Create `next-app/` with [templates/next-app/INIT.md](templates/next-app/INIT.md) (instructions only).
-2. Tell the user to run from the **repository root**:
+2. If database is enabled (§1.3), also copy [templates/next-app/PRISMA.md](templates/next-app/PRISMA.md) and the reference files under `templates/next-app/` (`prisma.config.ts`, `prisma/schema.prisma`, `lib/prisma.ts`) into `next-app/` as starting points (developer completes install and init).
+3. Tell the user to run from the **repository root**:
 
 ```bash
 cd next-app
 pnpm dlx shadcn@latest init --preset b0 --template next
 ```
 
-3. After they confirm init is done, they can open `next-app/` as the main coding root; agent work on app code stays under `next-app/` unless the user says otherwise.
+4. After they confirm init is done, they can open `next-app/` as the main coding root; agent work on app code stays under `next-app/` unless the user says otherwise.
 
 ### `AGENTS.md`
 
@@ -130,9 +154,9 @@ Generate from [templates/README.md](templates/README.md):
 
 - **Contexte** from §1.1
 - **Structure du dépôt** (US, next-app, AGENTS.md)
-- **Prérequis** (Node, pnpm, Docker if DB)
+- **Prérequis** (Node 20.19+, pnpm, Docker if DB)
 - **Démarrage** : shadcn init command (developer), then `pnpm install` / `pnpm dev` in `next-app/` when applicable — list commands as copy-paste blocks **without running them**
-- **Base de données** (if §1.3): docker command to start DB, env example, `pnpm db:migrate` from `next-app/`
+- **Base de données** (if §1.3): section Docker Compose (démarrer/arrêter/réinitialiser), copie `.env.example` → `.env`, `DATABASE_URL` dans `next-app/.env`, Prisma 7 setup (voir PRISMA.md), `pnpm db:migrate` depuis `next-app/`
 - **User stories** : how to add `US-XXX-*` folders
 
 ## Phase 3 — Handoff checklist
@@ -143,6 +167,8 @@ Report to the user:
 Bootstrap vibe-coding
 - [ ] US/ (+ stories créées)
 - [ ] next-app/INIT.md — init shadcn à lancer par vous
+- [ ] docker-compose.yml + .env.example — base PostgreSQL de test (si base de données)
+- [ ] next-app/PRISMA.md — setup Prisma 7 (si base de données)
 - [ ] AGENTS.md (règles validées)
 - [ ] README.md
 ```
@@ -153,6 +179,8 @@ Remind: agent must not run pnpm/npm/docker/git; MCP context7 + shadcn for framew
 
 - Running `pnpm`, `npm`, `yarn`, `git`, `docker`, or `shadcn init` from the agent
 - Writing Prisma migration SQL or creating `prisma/migrations/*` manually
+- Using Prisma < 7 patterns (`prisma-client-js`, `url` in `schema.prisma`, import from `@prisma/client`)
+- Creating `middleware.ts` instead of `proxy.ts`
 - Upgrading to Auth.js / next-auth v5 without explicit user request
 - Skipping the rules questionnaire
 
@@ -167,3 +195,10 @@ Remind: agent must not run pnpm/npm/docker/git; MCP context7 + shadcn for framew
 | [templates/US/story/technique.md](templates/US/story/technique.md) | Per-story template |
 | [templates/US/story/visuel.md](templates/US/story/visuel.md) | Per-story template |
 | [templates/next-app/INIT.md](templates/next-app/INIT.md) | Shadcn init instructions |
+| [templates/next-app/PRISMA.md](templates/next-app/PRISMA.md) | Prisma 7 setup instructions |
+| [templates/next-app/prisma.config.ts](templates/next-app/prisma.config.ts) | Prisma 7 config reference |
+| [templates/next-app/prisma/schema.prisma](templates/next-app/prisma/schema.prisma) | Prisma 7 schema reference |
+| [templates/next-app/lib/prisma.ts](templates/next-app/lib/prisma.ts) | PrismaClient singleton reference |
+| [templates/docker-compose.yml](templates/docker-compose.yml) | PostgreSQL de test (dev) |
+| [templates/.env.example](templates/.env.example) | Variables Docker à la racine |
+| [templates/next-app/.env.example](templates/next-app/.env.example) | `DATABASE_URL` pour l’app |
