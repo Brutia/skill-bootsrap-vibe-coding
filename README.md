@@ -20,8 +20,8 @@ Dans Cursor, invoquer le skill **bootstrap-vibe-coding** (par `@` ou en demandan
 L’agent va :
 
 1. Vous demander le **contexte projet** et quelles **règles AGENTS.md** garder / enlever / ajouter
-2. Créer `US/`, `next-app/` (avec instructions d’init), `AGENTS.md`, `README.md`
-3. Si base de données : `docker-compose.yml`, `.env.example`, modèles Prisma 7 (`prisma.config.ts`, `schema.prisma`, `lib/prisma.ts`, `PRISMA.md`)
+2. Créer `US/`, `next-app/` (uniquement `INIT.md`), `AGENTS.md`, `README.md`
+3. Si base de données : `docker-compose.yml`, `.env.example`, `prisma-bootstrap/` (fichiers Prisma de référence — **pas** dans `next-app/` avant init shadcn)
 4. **Ne pas** exécuter `pnpm`, `docker`, `git`, ni `shadcn init`
 
 Vous lancez vous-même :
@@ -29,7 +29,10 @@ Vous lancez vous-même :
 ```bash
 cd next-app
 pnpm dlx shadcn@latest init --preset b0 --template next
+# nom du projet : .
 ```
+
+Puis si base de données, copier `prisma-bootstrap/` → `next-app/` (voir `INIT.md`).
 
 ## Stack par défaut
 
@@ -48,23 +51,26 @@ pnpm dlx shadcn@latest init --preset b0 --template next
 ├── US/                 # Stories : fonctionnel / technique / visuel
 ├── docker-compose.yml  # PostgreSQL de test (si DB)
 ├── .env.example        # Variables Docker (si DB)
-├── next-app/           # App Next (init shadcn par le dev)
-│   ├── INIT.md         # Instructions shadcn + proxy
-│   ├── PRISMA.md       # Instructions Prisma 7 (si DB)
-│   ├── .env.example    # DATABASE_URL (si DB)
+├── prisma-bootstrap/   # Fichiers Prisma de référence (si DB, avant init shadcn)
+│   ├── PRISMA.md
 │   ├── prisma.config.ts
 │   ├── prisma/schema.prisma
-│   └── lib/prisma.ts
+│   ├── lib/prisma.ts
+│   └── .env.example
+├── next-app/           # App Next (init shadcn par le dev)
+│   └── INIT.md         # Seul fichier avant init shadcn
 ├── AGENTS.md           # Règles agents (personnalisables)
 └── README.md           # Commandes et contexte
 ```
+
+Après init shadcn + copie Prisma : `next-app/` contient l’app Next + `PRISMA.md`, `prisma/`, `lib/`, etc.
 
 ## Contenu du skill
 
 | Chemin | Description |
 |--------|-------------|
 | `SKILL.md` | Workflow agent |
-| `templates/` | Modèles AGENTS, README, US, INIT, Prisma 7, docker-compose |
+| `templates/` | Modèles AGENTS, README, US, INIT, prisma-bootstrap, docker-compose |
 
 ## Licence
 

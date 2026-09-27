@@ -67,7 +67,7 @@ Laisser au développeur les opérations qui modifient l’environnement (install
 - Après modification de `schema.prisma`, laisser le développeur lancer `pnpm db:migrate` depuis `next-app/` pour que Prisma génère les migrations.
 - Ne pas mettre `url` dans le bloc `datasource` de `schema.prisma` — l’URL est dans `prisma.config.ts`.
 - Utiliser `provider = "prisma-client"` (pas `prisma-client-js`) et l’import depuis `app/generated/prisma/client` (pas `@prisma/client`).
-- Instancier `PrismaClient` avec l’adaptateur `@prisma/adapter-pg` (voir [templates/next-app/lib/prisma.ts](templates/next-app/lib/prisma.ts)).
+- Instancier `PrismaClient` avec l’adaptateur `@prisma/adapter-pg` (voir [templates/prisma-bootstrap/lib/prisma.ts](templates/prisma-bootstrap/lib/prisma.ts)).
 
 #### Next.js — proxy (pas middleware)
 
@@ -108,7 +108,12 @@ If database is enabled (§1.3), also create at the **repository root**:
 ./
 ├── docker-compose.yml      # PostgreSQL de test (depuis templates/docker-compose.yml)
 ├── .env.example            # Variables Docker (POSTGRES_*)
-└── next-app/.env.example   # DATABASE_URL alignée sur le compose
+└── prisma-bootstrap/       # Fichiers Prisma de référence (hors next-app, avant init shadcn)
+    ├── PRISMA.md
+    ├── prisma.config.ts
+    ├── prisma/schema.prisma
+    ├── lib/prisma.ts
+    └── .env.example
 ```
 
 Replace `{{POSTGRES_VERSION}}`, `{{POSTGRES_USER}}`, `{{POSTGRES_PASSWORD}}`, `{{POSTGRES_DB}}` in those files with values from §1.3 (defaults: `16`, `app`, `app_dev`, `app`).
@@ -137,8 +142,8 @@ If the user provides story titles only, create empty files with section headings
 
 **Do not** run `pnpm dlx shadcn@latest init ...`.
 
-1. Create `next-app/` with [templates/next-app/INIT.md](templates/next-app/INIT.md) (instructions only).
-2. If database is enabled (§1.3), also copy [templates/next-app/PRISMA.md](templates/next-app/PRISMA.md) and the reference files under `templates/next-app/` (`prisma.config.ts`, `prisma/schema.prisma`, `lib/prisma.ts`) into `next-app/` as starting points (developer completes install and init).
+1. Create `next-app/` with **only** [templates/next-app/INIT.md](templates/next-app/INIT.md) — no `package.json`, no `prisma/`, no `lib/` before shadcn init.
+2. If database is enabled (§1.3), copy the reference files from [templates/prisma-bootstrap/](templates/prisma-bootstrap/) into `prisma-bootstrap/` at the repository root (not into `next-app/`). The developer copies them into `next-app/` **after** shadcn init (see INIT.md).
 3. Tell the user to run from the **repository root**:
 
 ```bash
@@ -146,7 +151,10 @@ cd next-app
 pnpm dlx shadcn@latest init --preset b0 --template next
 ```
 
-4. After they confirm init is done, they can open `next-app/` as the main coding root; agent work on app code stays under `next-app/` unless the user says otherwise.
+At the project name prompt, answer **`.`** (current directory). If `INIT.md` blocks an empty-directory check, follow the workaround in INIT.md (temporarily move INIT.md, init, restore).
+
+4. After init, if database is enabled, the developer copies Prisma files from `prisma-bootstrap/` into `next-app/` and follows `PRISMA.md` (see INIT.md § Après l’init).
+5. After they confirm init is done, they can open `next-app/` as the main coding root; agent work on app code stays under `next-app/` unless the user says otherwise.
 
 ### `AGENTS.md`
 
@@ -163,8 +171,8 @@ Generate from [templates/README.md](templates/README.md):
 - **Contexte** from §1.1
 - **Structure du dépôt** (US, next-app, AGENTS.md)
 - **Prérequis** (Node 20.19+, pnpm, Docker if DB)
-- **Démarrage** : shadcn init command (developer), then `pnpm install` / `pnpm dev` in `next-app/` when applicable — list commands as copy-paste blocks **without running them**
-- **Base de données** (if §1.3): section Docker Compose (démarrer/arrêter/réinitialiser), copie `.env.example` → `.env`, `DATABASE_URL` dans `next-app/.env`, Prisma 7 setup (voir PRISMA.md), `pnpm db:migrate` depuis `next-app/`
+- **Démarrage** : shadcn init (developer, `next-app/` quasi vide), puis copie `prisma-bootstrap/` → `next-app/` si DB, puis `pnpm install` / `pnpm dev` — list commands as copy-paste blocks **without running them**
+- **Base de données** (if §1.3): section Docker Compose (démarrer/arrêter/réinitialiser), copie `.env.example` → `.env`, copie Prisma depuis `prisma-bootstrap/` après init shadcn, `DATABASE_URL` dans `next-app/.env`, Prisma 7 setup (voir `next-app/PRISMA.md` après copie), `pnpm db:migrate` depuis `next-app/`
 - **User stories** : how to add `US-XXX-*` folders
 
 ## Phase 3 — Handoff checklist
@@ -174,9 +182,9 @@ Report to the user:
 ```
 Bootstrap vibe-coding
 - [ ] US/ (+ stories créées)
-- [ ] next-app/INIT.md — init shadcn à lancer par vous
+- [ ] next-app/INIT.md — init shadcn à lancer par vous (dossier quasi vide)
 - [ ] docker-compose.yml + .env.example — base PostgreSQL de test (si base de données)
-- [ ] next-app/PRISMA.md — setup Prisma 7 (si base de données)
+- [ ] prisma-bootstrap/ — fichiers Prisma de référence à copier dans next-app/ après init (si base de données)
 - [ ] AGENTS.md (règles validées)
 - [ ] README.md
 ```
@@ -192,6 +200,7 @@ Remind: agent must not run commands that modify the environment (install, copy, 
 - Creating `middleware.ts` instead of `proxy.ts`
 - Upgrading to Auth.js / next-auth v5 without explicit user request
 - Skipping the rules questionnaire
+- Copying `prisma/`, `lib/`, or other files into `next-app/` before shadcn init (causes `next-app/next-app/` or init failure)
 
 ## Templates
 
@@ -203,11 +212,11 @@ Remind: agent must not run commands that modify the environment (install, copy, 
 | [templates/US/story/fonctionnel.md](templates/US/story/fonctionnel.md) | Per-story template |
 | [templates/US/story/technique.md](templates/US/story/technique.md) | Per-story template |
 | [templates/US/story/visuel.md](templates/US/story/visuel.md) | Per-story template |
-| [templates/next-app/INIT.md](templates/next-app/INIT.md) | Shadcn init instructions |
-| [templates/next-app/PRISMA.md](templates/next-app/PRISMA.md) | Prisma 7 setup instructions |
-| [templates/next-app/prisma.config.ts](templates/next-app/prisma.config.ts) | Prisma 7 config reference |
-| [templates/next-app/prisma/schema.prisma](templates/next-app/prisma/schema.prisma) | Prisma 7 schema reference |
-| [templates/next-app/lib/prisma.ts](templates/next-app/lib/prisma.ts) | PrismaClient singleton reference |
+| [templates/next-app/INIT.md](templates/next-app/INIT.md) | Shadcn init instructions (seul fichier dans `next-app/` au bootstrap) |
+| [templates/prisma-bootstrap/PRISMA.md](templates/prisma-bootstrap/PRISMA.md) | Prisma 7 setup (copié dans `next-app/` après init) |
+| [templates/prisma-bootstrap/prisma.config.ts](templates/prisma-bootstrap/prisma.config.ts) | Prisma 7 config reference |
+| [templates/prisma-bootstrap/prisma/schema.prisma](templates/prisma-bootstrap/prisma/schema.prisma) | Prisma 7 schema reference |
+| [templates/prisma-bootstrap/lib/prisma.ts](templates/prisma-bootstrap/lib/prisma.ts) | PrismaClient singleton reference |
+| [templates/prisma-bootstrap/.env.example](templates/prisma-bootstrap/.env.example) | `DATABASE_URL` pour l’app (copié dans `next-app/` après init) |
 | [templates/docker-compose.yml](templates/docker-compose.yml) | PostgreSQL de test (dev) |
 | [templates/.env.example](templates/.env.example) | Variables Docker à la racine |
-| [templates/next-app/.env.example](templates/next-app/.env.example) | `DATABASE_URL` pour l’app |

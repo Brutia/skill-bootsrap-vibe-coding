@@ -4,11 +4,14 @@ Ce guide décrit la stack base de données par défaut : **Prisma ORM 7** + Post
 
 L’agent **ne lance pas** ces commandes à votre place.
 
+> Ce fichier est copié dans `next-app/` après l’init shadcn (voir [INIT.md](../next-app/INIT.md)). Les commandes ci-dessous s’exécutent depuis `next-app/`.
+
 ## Prérequis
 
 - Node.js **20.19+**
 - TypeScript **5.4+**
-- PostgreSQL accessible via Docker Compose (voir ci-dessous)
+- Init shadcn terminée dans `next-app/` (voir `INIT.md`)
+- Fichiers Prisma copiés depuis `prisma-bootstrap/` (voir `INIT.md` § Après l’init)
 
 ## 0. Démarrer PostgreSQL (Docker)
 
@@ -30,34 +33,27 @@ Le `DATABASE_URL` doit correspondre aux identifiants du `docker-compose.yml` (pa
 ## 1. Installer les dépendances
 
 ```bash
-cd next-app
 pnpm add @prisma/client @prisma/adapter-pg dotenv pg
 pnpm add -D prisma tsx @types/pg
 ```
 
-## 2. Initialiser Prisma
+## 2. Fichiers de référence
 
-```bash
-pnpm dlx prisma init --output ../app/generated/prisma
-```
-
-Cela génère :
-
-- `prisma/schema.prisma`
-- `prisma.config.ts`
-- `.env` (avec un `DATABASE_URL` local)
-
-Si Docker Compose est déjà démarré, remplacer le `DATABASE_URL` généré par celui de `.env.example` (aligné sur le compose).
-
-## 3. Fichiers de référence
-
-Comparer et adapter les fichiers suivants (fournis comme modèles dans ce dépôt) :
+Les fichiers suivants ont été copiés depuis `prisma-bootstrap/` lors du bootstrap. Vérifier qu’ils sont présents et les adapter si besoin :
 
 | Fichier | Rôle |
 |---------|------|
 | `prisma.config.ts` | URL de connexion (`env("DATABASE_URL")`), chemin des migrations |
 | `prisma/schema.prisma` | Modèles ; **pas de `url`** dans le bloc `datasource` |
 | `lib/prisma.ts` | Singleton `PrismaClient` avec adaptateur `@prisma/adapter-pg` |
+
+Si un fichier manque, le recopier depuis `../prisma-bootstrap/` ou lancer :
+
+```bash
+pnpm dlx prisma init --output ../app/generated/prisma
+```
+
+puis réaligner sur les modèles de `prisma-bootstrap/`.
 
 ### Points clés Prisma 7
 
@@ -67,9 +63,9 @@ Comparer et adapter les fichiers suivants (fournis comme modèles dans ce dépô
 - `import "dotenv/config"` en tête de `prisma.config.ts`
 - Pas de propriété `engine` dans `prisma.config.ts`
 
-## 4. Scripts `package.json`
+## 3. Scripts `package.json`
 
-Ajouter (ou adapter) dans `next-app/package.json` :
+Ajouter (ou adapter) dans `package.json` :
 
 ```json
 {
@@ -82,7 +78,7 @@ Ajouter (ou adapter) dans `next-app/package.json` :
 }
 ```
 
-## 5. Première migration
+## 4. Première migration
 
 ```bash
 pnpm db:migrate

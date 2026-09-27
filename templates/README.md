@@ -11,7 +11,8 @@
 | Dossier / fichier | Rôle |
 |-------------------|------|
 | `US/` | User stories (fonctionnel, technique, visuel) |
-| `next-app/` | Application Next.js (shadcn, preset b0) |
+| `next-app/` | Application Next.js (shadcn, preset b0) — quasi vide avant init |
+| `prisma-bootstrap/` | Fichiers Prisma de référence (copiés dans `next-app/` après init shadcn) |
 | `docker-compose.yml` | PostgreSQL de test (dev local) |
 | `AGENTS.md` | Règles pour les agents IA |
 
@@ -27,16 +28,30 @@
 
 ### 1. Initialiser l’application Next (shadcn)
 
-À exécuter **une fois** par le développeur :
+`next-app/` ne contient que `INIT.md` après le bootstrap. À exécuter **une fois** par le développeur :
 
 ```bash
 cd next-app
 pnpm dlx shadcn@latest init --preset b0 --template next
 ```
 
-Voir aussi `next-app/INIT.md`.
+Au prompt nom du projet : **`.`** (dossier courant). Voir `next-app/INIT.md` si `INIT.md` bloque l’init.
 
-### 2. Installer les dépendances et lancer le dev server
+### 2. Copier les fichiers Prisma (si base de données)
+
+Après l’init shadcn réussie, depuis `next-app/` :
+
+```bash
+cp -r ../prisma-bootstrap/prisma .
+cp ../prisma-bootstrap/prisma.config.ts .
+cp -r ../prisma-bootstrap/lib .
+cp ../prisma-bootstrap/.env.example .
+mv ../prisma-bootstrap/PRISMA.md .
+```
+
+Puis suivre `next-app/PRISMA.md` pour installer les deps Prisma.
+
+### 3. Installer les dépendances et lancer le dev server
 
 ```bash
 cd next-app
@@ -50,7 +65,7 @@ L’application est en général disponible sur [http://localhost:3000](http://l
 
 <!-- Supprimer cette section si pas de DB -->
 
-Stack par défaut : **Prisma ORM 7** + PostgreSQL via Docker Compose. Voir `next-app/PRISMA.md` pour la configuration Prisma.
+Stack par défaut : **Prisma ORM 7** + PostgreSQL via Docker Compose. Les fichiers de référence sont dans `prisma-bootstrap/` ; après init shadcn, copier dans `next-app/` et suivre `next-app/PRISMA.md`.
 
 ### 1. Démarrer PostgreSQL (Docker)
 
@@ -95,16 +110,15 @@ Valeurs par défaut (dev local) :
 DATABASE_URL="postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@localhost:5432/{{POSTGRES_DB}}"
 ```
 
-### 3. Initialiser Prisma 7 (développeur)
+### 3. Configurer Prisma 7 (développeur)
+
+Les fichiers ont été copiés depuis `prisma-bootstrap/` (étape Démarrage §2). Installer les deps et adapter si besoin — voir `next-app/PRISMA.md` :
 
 ```bash
 cd next-app
 pnpm add @prisma/client @prisma/adapter-pg dotenv pg
 pnpm add -D prisma tsx @types/pg
-pnpm dlx prisma init --output ../app/generated/prisma
 ```
-
-Puis adapter `prisma.config.ts`, `prisma/schema.prisma` et `lib/prisma.ts` selon les fichiers de référence du dépôt.
 
 ### 4. Migrations Prisma
 
