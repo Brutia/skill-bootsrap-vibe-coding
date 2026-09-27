@@ -11,15 +11,23 @@ Règles pour les agents Cursor travaillant sur ce dépôt vibe-coding.
 - Utiliser le serveur MCP **user-context7** pour vérifier les versions de bibliothèques et les APIs avant d’implémenter du code dépendant d’un framework.
 - Utiliser le serveur MCP **user-shadcn** pour concevoir ou étendre les composants UI selon les conventions shadcn.
 
+## Qualité du code
+
+Toute modification doit laisser le projet dans un état valide : **`pnpm build`** et **`pnpm lint`** (depuis `next-app/`) doivent réussir.
+
+Après des changements de code, lancer ces deux commandes pour vérifier qu’aucune régression n’a été introduite. Corriger les erreurs avant de considérer la tâche terminée.
+
 ## Exécution des commandes
 
-Ne pas exécuter depuis le contexte agent les commandes de gestionnaire de paquets ou système, notamment :
+Ne pas exécuter les commandes qui **modifient** l’environnement ou le dépôt, notamment :
 
-- `pnpm`, `npm`, `yarn`, `tsx`
-- `docker`, `git`
-- et outils similaires
+- installation ou mise à jour de dépendances (`pnpm install`, `pnpm add`, `npm install`, etc.)
+- copie ou génération de fichiers (`cp`, `shadcn init`, migrations Prisma, etc.)
+- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git commit`, etc.)
 
-Laisser ces opérations au développeur ou à l’environnement dédié.
+Les commandes de **vérification en lecture seule** sont autorisées (ex. `pnpm build`, `pnpm lint`, `pnpm tsc --noEmit`).
+
+Laisser au développeur les opérations qui modifient l’environnement (install, migrations, déploiement, etc.).
 
 ## Base de données (Prisma 7)
 

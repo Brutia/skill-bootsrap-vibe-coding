@@ -9,7 +9,7 @@ description: >-
 
 # Bootstrap vibe-coding (Next.js)
 
-Scaffold a project root for vibe-coding: user stories, Next app placeholder, agent rules, and developer README. **Do not** run package managers, git, docker, or shadcn init — the developer runs those.
+Scaffold a project root for vibe-coding: user stories, Next app placeholder, agent rules, and developer README. **Do not** run commands that modify the environment (install, copy, git, docker, shadcn init) — the developer runs those.
 
 ## Preconditions
 
@@ -42,15 +42,23 @@ Default rules (verbatim baseline for `AGENTS.md`):
 - Utiliser le serveur MCP **user-context7** pour vérifier les versions de bibliothèques et les APIs avant d’implémenter du code dépendant d’un framework.
 - Utiliser le serveur MCP **user-shadcn** pour concevoir ou étendre les composants UI selon les conventions shadcn.
 
+#### Qualité du code
+
+Toute modification doit laisser le projet dans un état valide : **`pnpm build`** et **`pnpm lint`** (depuis `next-app/`) doivent réussir.
+
+Après des changements de code, lancer ces deux commandes pour vérifier qu’aucune régression n’a été introduite. Corriger les erreurs avant de considérer la tâche terminée.
+
 #### Exécution des commandes
 
-Ne pas exécuter depuis le contexte agent les commandes de gestionnaire de paquets ou système, notamment :
+Ne pas exécuter les commandes qui **modifient** l’environnement ou le dépôt, notamment :
 
-- `pnpm`, `npm`, `yarn`, `tsx`
-- `docker`, `git`
-- et outils similaires
+- installation ou mise à jour de dépendances (`pnpm install`, `pnpm add`, `npm install`, etc.)
+- copie ou génération de fichiers (`cp`, `shadcn init`, migrations Prisma, etc.)
+- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git commit`, etc.)
 
-Laisser ces opérations au développeur ou à l’environnement dédié.
+Les commandes de **vérification en lecture seule** sont autorisées (ex. `pnpm build`, `pnpm lint`, `pnpm tsc --noEmit`).
+
+Laisser au développeur les opérations qui modifient l’environnement (install, migrations, déploiement, etc.).
 
 #### Base de données (Prisma 7)
 
@@ -173,11 +181,12 @@ Bootstrap vibe-coding
 - [ ] README.md
 ```
 
-Remind: agent must not run pnpm/npm/docker/git; MCP context7 + shadcn for framework/UI work.
+Remind: agent must not run commands that modify the environment (install, copy, docker, git); run `pnpm build` and `pnpm lint` to verify changes; MCP context7 + shadcn for framework/UI work.
 
 ## Anti-patterns
 
-- Running `pnpm`, `npm`, `yarn`, `git`, `docker`, or `shadcn init` from the agent
+- Running commands that modify the environment (`pnpm install`, `pnpm add`, `git commit`, `docker compose up`, `shadcn init`, etc.)
+- Finishing a task without verifying `pnpm build` and `pnpm lint` pass
 - Writing Prisma migration SQL or creating `prisma/migrations/*` manually
 - Using Prisma < 7 patterns (`prisma-client-js`, `url` in `schema.prisma`, import from `@prisma/client`)
 - Creating `middleware.ts` instead of `proxy.ts`
