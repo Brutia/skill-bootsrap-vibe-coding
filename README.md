@@ -60,6 +60,7 @@ Puis si base de données, copier `prisma-bootstrap/` → `next-app/` (voir `INIT
 ├── next-app/           # App Next (init shadcn par le dev)
 │   └── INIT.md         # Seul fichier avant init shadcn
 ├── AGENTS.md           # Règles agents (personnalisables)
+├── CLAUDE.md           # Importe AGENTS.md (Claude Code)
 └── README.md           # Commandes et contexte
 ```
 

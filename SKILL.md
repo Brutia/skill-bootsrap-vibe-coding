@@ -54,11 +54,18 @@ Ne pas exécuter les commandes qui **modifient** l’environnement ou le dépôt
 
 - installation ou mise à jour de dépendances (`pnpm install`, `pnpm add`, `npm install`, etc.)
 - copie ou génération de fichiers (`cp`, `shadcn init`, migrations Prisma, etc.)
-- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git commit`, etc.)
+- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git push`, `git reset --hard`, etc.)
 
 Les commandes de **vérification en lecture seule** sont autorisées (ex. `pnpm build`, `pnpm lint`, `pnpm tsc --noEmit`).
 
 Laisser au développeur les opérations qui modifient l’environnement (install, migrations, déploiement, etc.).
+
+#### Git
+
+- L’agent peut créer des commits locaux (`git add`, `git commit`) une fois `pnpm build` et `pnpm lint` passés.
+- Messages de commit en [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.), courts et centrés sur le « pourquoi ».
+- Ne jamais lancer `git push`, `git reset --hard`, `git push --force`, ni réécrire l’historique sans demande explicite du développeur.
+- Ne jamais committer de secrets (`.env`, clés, tokens).
 
 #### Base de données (Prisma 7)
 
@@ -99,6 +106,7 @@ At the target root, create:
 ├── US/
 ├── next-app/
 ├── AGENTS.md
+├── CLAUDE.md               # contient uniquement `@AGENTS.md` (depuis templates/CLAUDE.md)
 └── README.md
 ```
 
@@ -164,6 +172,10 @@ Generate from [templates/AGENTS.md](templates/AGENTS.md):
 - Inject **Contexte du projet** from §1.1.
 - Keep tone imperative and concise; French is fine if the user works in French.
 
+### `CLAUDE.md`
+
+Copy [templates/CLAUDE.md](templates/CLAUDE.md) as-is (a single `@AGENTS.md` import so Claude Code reads the same rules).
+
 ### `README.md`
 
 Generate from [templates/README.md](templates/README.md):
@@ -189,11 +201,11 @@ Bootstrap vibe-coding
 - [ ] README.md
 ```
 
-Remind: agent must not run commands that modify the environment (install, copy, docker, git); run `pnpm build` and `pnpm lint` to verify changes; MCP context7 + shadcn for framework/UI work.
+Remind: agent must not run commands that modify the environment (install, copy, docker, git push); it may create local commits after build/lint pass; run `pnpm build` and `pnpm lint` to verify changes; MCP context7 + shadcn for framework/UI work.
 
 ## Anti-patterns
 
-- Running commands that modify the environment (`pnpm install`, `pnpm add`, `git commit`, `docker compose up`, `shadcn init`, etc.)
+- Running commands that modify the environment (`pnpm install`, `pnpm add`, `git commit`, `docker compose up`, `shadcn init`, `git push`, etc.)
 - Finishing a task without verifying `pnpm build` and `pnpm lint` pass
 - Writing Prisma migration SQL or creating `prisma/migrations/*` manually
 - Using Prisma < 7 patterns (`prisma-client-js`, `url` in `schema.prisma`, import from `@prisma/client`)
@@ -207,6 +219,7 @@ Remind: agent must not run commands that modify the environment (install, copy, 
 | File | Role |
 |------|------|
 | [templates/AGENTS.md](templates/AGENTS.md) | Default agent rules skeleton |
+| [templates/CLAUDE.md](templates/CLAUDE.md) | Claude Code entry point (imports `AGENTS.md`) |
 | [templates/README.md](templates/README.md) | Developer README skeleton |
 | [templates/US/README.md](templates/US/README.md) | US folder conventions |
 | [templates/US/story/fonctionnel.md](templates/US/story/fonctionnel.md) | Per-story template |

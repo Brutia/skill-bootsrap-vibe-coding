@@ -15,6 +15,7 @@
 | `prisma-bootstrap/` | Fichiers Prisma de référence (copiés dans `next-app/` après init shadcn) |
 | `docker-compose.yml` | PostgreSQL de test (dev local) |
 | `AGENTS.md` | Règles pour les agents IA |
+| `CLAUDE.md` | Point d’entrée Claude Code (importe `AGENTS.md`) |
 
 ## Prérequis
 

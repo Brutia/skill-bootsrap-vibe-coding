@@ -23,13 +23,20 @@ Ne pas exécuter les commandes qui **modifient** l’environnement ou le dépôt
 
 - installation ou mise à jour de dépendances (`pnpm install`, `pnpm add`, `npm install`, etc.)
 - copie ou génération de fichiers (`cp`, `shadcn init`, migrations Prisma, etc.)
-- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git commit`, etc.)
+- opérations Docker, Git ou système qui altèrent l’état (`docker compose up`, `git push`, `git reset --hard`, etc.)
 
 Les commandes de **vérification en lecture seule** sont autorisées (ex. `pnpm build`, `pnpm lint`, `pnpm tsc --noEmit`).
 
 Laisser au développeur les opérations qui modifient l’environnement (install, migrations, déploiement, etc.).
 
 N’utilise jamais `cd` dans les commandes Bash : passe les chemins directement (relatifs à la racine du projet) ou utilise les outils Read/Grep/Glob.
+
+## Git
+
+- L’agent peut créer des commits locaux (`git add`, `git commit`) une fois `pnpm build` et `pnpm lint` passés.
+- Messages de commit en [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.), courts et centrés sur le « pourquoi ».
+- Ne jamais lancer `git push`, `git reset --hard`, `git push --force`, ni réécrire l’historique sans demande explicite du développeur.
+- Ne jamais committer de secrets (`.env`, clés, tokens).
 
 ## Base de données (Prisma 7)
 
