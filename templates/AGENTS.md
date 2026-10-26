@@ -29,6 +29,8 @@ Les commandes de **vérification en lecture seule** sont autorisées (ex. `pnpm 
 
 Laisser au développeur les opérations qui modifient l’environnement (install, migrations, déploiement, etc.).
 
+N’utilise jamais `cd` dans les commandes Bash : passe les chemins directement (relatifs à la racine du projet) ou utilise les outils Read/Grep/Glob.
+
 ## Base de données (Prisma 7)
 
 - Utiliser **Prisma ORM 7** (Node.js 20.19+, TypeScript 5.4+).
@@ -36,6 +38,7 @@ Laisser au développeur les opérations qui modifient l’environnement (install
 - Après modification de `schema.prisma`, laisser le développeur lancer `pnpm db:migrate` depuis `next-app/` pour que Prisma génère les migrations.
 - Ne pas mettre `url` dans le bloc `datasource` de `schema.prisma` — l’URL est dans `prisma.config.ts`.
 - Utiliser `provider = "prisma-client"` (pas `prisma-client-js`) et importer depuis `app/generated/prisma/client` (pas `@prisma/client`).
+- Le dossier `app/generated/prisma` doit être ignoré par Git : vérifier que `next-app/.gitignore` contient `/app/generated/prisma` et l’ajouter sinon.
 - Instancier `PrismaClient` avec l’adaptateur `@prisma/adapter-pg` (voir `lib/prisma.ts`).
 
 ## Next.js — proxy (pas middleware)
