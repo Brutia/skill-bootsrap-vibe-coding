@@ -31,6 +31,10 @@ Laisser au développeur les opérations qui modifient l’environnement (install
 
 N’utilise jamais `cd` dans les commandes Bash : passe les chemins directement (relatifs à la racine du projet) ou utilise les outils Read/Grep/Glob.
 
+## Modification de fichiers
+
+Pour modifier un fichier, utiliser l’outil **Edit** (ou Write pour créer/remplacer un fichier entier). Ne jamais passer par Python, `sed`, `awk`, `echo >`, heredoc ou toute autre commande Bash pour écrire ou modifier des fichiers.
+
 ## Git
 
 - L’agent peut créer des commits locaux (`git add`, `git commit`) une fois `pnpm build` et `pnpm lint` passés.
